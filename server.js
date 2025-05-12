@@ -34,6 +34,24 @@ app.get(['/', '/index.html'], (req, res) => {
 });
 
 
+app.get('/api/verify-email', async (req, res) => {
+  try {
+    const { token } = req.query;
+    console.log('Verifying token:', token);
+    
+    
+    res.send('<h1>Email Verified!</h1>');
+  } catch (err) {
+    console.error('Verification failed:', err);
+    res.redirect('/failedEmailVerification?error=server_error');
+  }
+});
+
+app.get('/resend-verification', (req, res) => {
+  res.sendFile(path.join(__dirname, 'resend-verification.html'));
+});
+
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, '404.html'));
