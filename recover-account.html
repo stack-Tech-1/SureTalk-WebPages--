@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Recovery | SureTalk</title>
+  <style>
+    :root {
+      --primary: #3498db;
+      --primary-dark: #2980b9;
+      --danger: #e74c3c;
+      --success: #2ecc71;
+      --gray: #95a5a6;
+      --dark: #2c3e50;
+      --light: #ecf0f1;
+    }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: var(--dark);
+      line-height: 1.6;
+    }
+    
+    .container {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 500px;
+      margin: 1rem;
+    }
+    
+    h1 {
+      color: var(--dark);
+      margin-top: 0;
+      text-align: center;
+    }
+    
+    .recovery-step {
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .recovery-step.active {
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+    
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    button:disabled {
+      background-color: var(--gray);
+      cursor: not-allowed;
+    }
+    
+    .message {
+      padding: 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+      display: none;
+    }
+    
+    .message.error {
+      background-color: #fde8e8;
+      color: var(--danger);
+      display: block;
+    }
+    
+    .message.success {
+      background-color: #e8fdf1;
+      color: var(--success);
+      display: block;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .token-display {
+      word-break: break-all;
+      font-family: monospace;
+      background: var(--light);
+      padding: 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Account Recovery</h1>
+    
+    <!-- Step 1: Email Input -->
+    <div id="step1" class="recovery-step active">
+      <p>Enter your email address to begin account recovery.</p>
+      
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="your@email.com" required>
+      </div>
+      
+      <button id="requestRecovery">
+        <span id="requestSpinner" class="spinner" style="display: none;"></span>
+        Send Recovery Link
+      </button>
+      
+      <div id="message1" class="message"></div>
+    </div>
+    
+    <!-- Step 2: Confirmation -->
+    <div id="step2" class="recovery-step">
+      <div class="message success">
+        We've sent a recovery link to your email address. Please check your inbox.
+      </div>
+      
+      <p>Didn't receive the email?</p>
+      <button id="resendButton">
+        <span id="resendSpinner" class="spinner" style="display: none;"></span>
+        Resend Email
+      </button>
+      
+      <div id="message2" class="message"></div>
+    </div>
+    
+    <!-- Step 3: Token Verification -->
+    <div id="step3" class="recovery-step">
+      <p>Paste the recovery token from your email:</p>
+      
+      <div class="form-group">
+        <input type="text" id="token" placeholder="Paste recovery token here" required>
+      </div>
+      
+      <button id="completeRecovery">
+        <span id="completeSpinner" class="spinner" style="display: none;"></span>
+        Verify Token
+      </button>
+      
+      <div id="message3" class="message"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const BACKEND_URL = 'https://suretalk-api.onrender.com';
+      const FRONTEND_URL = 'https://suretalk-signup.onrender.com';
+      
+      // DOM elements
+      const step1 = document.getElementById('step1');
+      const step2 = document.getElementById('step2');
+      const step3 = document.getElementById('step3');
+      const emailInput = document.getElementById('email');
+      const tokenInput = document.getElementById('token');
+      const requestBtn = document.getElementById('requestRecovery');
+      const resendBtn = document.getElementById('resendButton');
+      const completeBtn = document.getElementById('completeRecovery');
+      const message1 = document.getElementById('message1');
+      const message2 = document.getElementById('message2');
+      const message3 = document.getElementById('message3');
+      const requestSpinner = document.getElementById('requestSpinner');
+      const resendSpinner = document.getElementById('resendSpinner');
+      const completeSpinner = document.getElementById('completeSpinner');
+      
+      let recoveryEmail = '';
+      
+      // Check URL for token (direct link access)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+      
+      if (urlToken) {
+        // Auto-progress to token verification
+        showStep(3);
+        tokenInput.value = urlToken;
+      }
+      
+      // Step navigation
+      function showStep(stepNumber) {
+        [step1, step2, step3].forEach((step, index) => {
+          step.classList.toggle('active', index + 1 === stepNumber);
+        });
+      }
+      
+      // Message display
+      function showMessage(element, text, type) {
+        element.textContent = text;
+        element.className = `message ${type}`;
+        element.style.display = 'block';
+        
+        if (type === 'success') {
+          setTimeout(() => {
+            element.style.display = 'none';
+          }, 5000);
+        }
+      }
+      
+      // Request recovery link
+      requestBtn.addEventListener('click', async function() {
+        const email = emailInput.value.trim();
+        
+        if (!email) {
+          showMessage(message1, 'Please enter your email address', 'error');
+          return;
+        }
+        
+        try {
+          requestBtn.disabled = true;
+          requestSpinner.style.display = 'inline-block';
+          requestBtn.textContent = ' Sending...';
+          
+          const response = await fetch(`${BACKEND_URL}/api/request-recovery`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            recoveryEmail = email;
+            showStep(2);
+          } else {
+            showMessage(message1, data.error || 'Recovery request failed', 'error');
+          }
+        } catch (error) {
+          console.error('Request error:', error);
+          showMessage(message1, 'Network error. Please try again.', 'error');
+        } finally {
+          requestBtn.disabled = false;
+          requestSpinner.style.display = 'none';
+          requestBtn.textContent = 'Send Recovery Link';
+        }
+      });
+      
+      // Resend recovery link
+      resendBtn.addEventListener('click', async function() {
+        if (!recoveryEmail) return;
+        
+        try {
+          resendBtn.disabled = true;
+          resendSpinner.style.display = 'inline-block';
+          resendBtn.textContent = ' Resending...';
+          
+          const response = await fetch(`${BACKEND_URL}/api/request-recovery`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email: recoveryEmail })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            showMessage(message2, 'Recovery email resent successfully!', 'success');
+          } else {
+            showMessage(message2, data.error || 'Failed to resend email', 'error');
+          }
+        } catch (error) {
+          console.error('Resend error:', error);
+          showMessage(message2, 'Network error. Please try again.', 'error');
+        } finally {
+          resendBtn.disabled = false;
+          resendSpinner.style.display = 'none';
+          resendBtn.textContent = 'Resend Email';
+        }
+      });
+
+       
+      // Complete recovery with token
+      completeBtn.addEventListener('click', async function() {
+        const token = tokenInput.value.trim();
+        
+        if (!token) {
+          showMessage(message3, 'Please enter the recovery token', 'error');
+          return;
+        }
+        
+        try {
+          completeBtn.disabled = true;
+          completeSpinner.style.display = 'inline-block';
+          completeBtn.textContent = ' Verifying...';
+          
+          const response = await fetch(`${BACKEND_URL}/api/complete-recovery`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ token })
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            showMessage(message3, 
+              'Check your email for temporary access credentials. ' +
+              'You will be redirected shortly...', 
+              'success');
+            
+            // Redirect to login after delay
+            setTimeout(() => {
+              window.location.href = `${FRONTEND_URL}/login`;
+            }, 3000);
+          } else {
+            showMessage(message3, data.error || 'Invalid recovery token', 'error');
+          }
+        } catch (error) {
+          console.error('Verification error:', error);
+          showMessage(message3, 'Network error. Please try again.', 'error');
+        } finally {
+          completeBtn.disabled = false;
+          completeSpinner.style.display = 'none';
+          completeBtn.textContent = 'Verify Token';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

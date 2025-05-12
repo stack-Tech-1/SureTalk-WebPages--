@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | SureTalk</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6C63FF;
+      --primary-dark: #564FD8;
+      --secondary: #FF6584;
+      --dark: #2D3748;
+      --light: #F7FAFC;
+      --gray: #E2E8F0;
+      --success: #48BB78;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--light);
+      color: var(--dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      background-image: radial-gradient(circle at 10% 20%, rgba(108, 99, 255, 0.05) 0%, rgba(108, 99, 255, 0.05) 90%);
+    }
+    
+    .logo {
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    
+    .logo h1 {
+      color: var(--primary);
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    
+    .logo p {
+      color: var(--dark);
+      opacity: 0.7;
+      font-size: 1rem;
+    }
+    
+    .auth-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(108, 99, 255, 0.1);
+      width: 100%;
+      max-width: 500px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .auth-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 6px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+    
+    h2 {
+      font-size: 1.75rem;
+      margin-bottom: 1.5rem;
+      color: var(--dark);
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: var(--dark);
+    }
+    
+    label.required::after {
+      content: ' *';
+      color: var(--secondary);
+    }
+    
+    input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--gray);
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+    }
+    
+    .forgot-password {
+      text-align: right;
+      margin: 0.5rem 0 1.5rem;
+    }
+    
+    .forgot-password a {
+      color: var(--primary);
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    
+    .forgot-password a:hover {
+      text-decoration: underline;
+    }
+    
+    button {
+      background: var(--primary);
+      color: white;
+      padding: 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 1.5rem 0;
+      color: #A0AEC0;
+      font-size: 0.875rem;
+    }
+    
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--gray);
+    }
+    
+    .divider::before {
+      margin-right: 1rem;
+    }
+    
+    .divider::after {
+      margin-left: 1rem;
+    }
+    
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #718096;
+    }
+    
+    .auth-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+    
+    .alert {
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .alert.success {
+      background: #48BB78;
+      color: white;
+    }
+    
+    .alert.error {
+      background: #FF6584;
+      color: white;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .auth-container {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">
+    <h1>SureTalk</h1>
+    <p>Stay Connected!, Stay Sure</p>
+  </div>
+  
+  <div class="auth-container">
+    <h2>Welcome Back</h2>
+    
+    <form id="login-form">
+      <div class="form-group">
+        <label for="login-email" class="required">Email Address</label>
+        <input type="email" id="login-email" name="email" required placeholder="your@email.com">
+      </div>
+      
+      <div class="form-group">
+        <label for="login-password" class="required">Password</label>
+        <input type="password" id="login-password" name="password" required placeholder="Enter your password">
+      </div>
+      
+      <div class="forgot-password">
+        <a href="/forgot-password.html">Forgot password?</a>
+      </div>
+      
+      <button type="submit">Login to Your Account</button>
+    </form>
+    
+    <div class="divider">OR</div>
+    
+    <button type="button" style="background: #4285F4; display: flex; align-items: center; justify-content: center;">
+      <svg style="width: 20px; height: 20px; margin-right: 10px;" viewBox="0 0 24 24">
+        <path fill="white" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+        <path fill="white" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+        <path fill="white" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+        <path fill="white" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+      </svg>
+      Continue with Google
+    </button>
+    
+    <div class="auth-footer">
+      Don't have an account? <a href="/">Sign up</a>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span> Logging in...';
+
+      try {
+        const response = await fetch('https://suretalk-api.onrender.com/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: document.getElementById('login-email').value.trim(),
+            password: document.getElementById('login-password').value
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Login failed');
+        }
+
+        localStorage.setItem('authToken', data.token);
+        window.location.href = '/dashboard.html';
+        
+      } catch (error) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert error';
+        alertDiv.textContent = error.message;
+        document.querySelector('.auth-container').prepend(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+      }
+    });
+  </script>
+</body>
+</html>
