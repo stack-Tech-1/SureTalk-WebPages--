@@ -59,7 +59,7 @@
     if (!token) {
       window.location.href = 'http://51.20.70.31:10000/failedEmailVerification?error=missing_token';
     } else {
-      fetch(`${window.location.origin}/api/verify-email?token=${token}`)
+      fetch(`http://51.20.142.251:3000/api/verify-email?token=${token}`)
         .then(response => {
           if (!response.ok) {
             window.location.href = 'http://51.20.70.31:10000/failedEmailVerification?error=invalid_or_expired';
