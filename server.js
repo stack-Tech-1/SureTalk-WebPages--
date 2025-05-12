@@ -39,7 +39,7 @@ app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, '404.html'));
 });
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, '0.0.0.0', () => {
+const PORT = process.env.PORT || 80;
+app.listen(PORT, '80', () => {
   console.log(`Server running on port ${PORT}`);
 });
