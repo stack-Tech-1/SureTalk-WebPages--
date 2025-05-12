@@ -39,5 +39,7 @@ app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, '404.html'));
 });
 
-const PORT = process.env.PORT || 10000; // Must match Render's port
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const PORT = process.env.PORT || 10000; 
+app.listen(PORT, () => {
+  console.log(`Frontend running on port ${PORT}`);
+});
